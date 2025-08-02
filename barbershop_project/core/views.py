@@ -1,155 +1,79 @@
-from django.shortcuts import render
 
-# Данные из задания
-masters = [
-    {"id": 1, "name": "Эльдар 'Бритва' Рязанов"},
-    {"id": 2, "name": "Зоя 'Ножницы' Космодемьянская"},
-    {"id": 3, "name": "Борис 'Фен' Пастернак"},
-    {"id": 4, "name": "Иннокентий 'Лак' Смоктуновский"},
-    {"id": 5, "name": "Раиса 'Бигуди' Горбачёва"},
-]
-
-services = [
-    "Стрижка под 'Горшок'",
-    "Укладка 'Взрыв на макаронной фабрике'",
-    "Королевское бритье опасной бритвой",
-    "Окрашивание 'Жизнь в розовом цвете'",
-    "Мытье головы 'Душ впечатлений'",
-    "Стрижка бороды 'Боярин'",
-    "Массаж головы 'Озарение'",
-    "Укладка 'Ветер в голове'",
-    "Плетение косичек 'Викинг'",
-    "Полировка лысины до блеска"
-]
-
-# Статусы заявок
-STATUS_NEW = 'новая'
-STATUS_CONFIRMED = 'подтвержденная'
-STATUS_CANCELLED = 'отмененная'
-STATUS_COMPLETED = 'выполненная'
-
-orders = [
-    {
-        "id": 1,
-        "client_name": "Пётр 'Безголовый' Головин",
-        "services": ["Стрижка под 'Горшок'", "Полировка лысины до блеска"],
-        "master_id": 1,
-        "date": "2025-03-20",
-        "status": STATUS_NEW
-    },
-    {
-        "id": 2,
-        "client_name": "Василий 'Кудрявый' Прямиков",
-        "services": ["Укладка 'Взрыв на макаронной фабрике'"],
-        "master_id": 2,
-        "date": "2025-03-21",
-        "status": STATUS_CONFIRMED
-    },
-    {
-        "id": 3,
-        "client_name": "Афанасий 'Бородач' Бритвенников",
-        "services": ["Королевское бритье опасной бритвой", "Стрижка бороды 'Боярин'", "Массаж головы 'Озарение'"],
-        "master_id": 3,
-        "date": "2025-03-19",
-        "status": STATUS_COMPLETED
-    },
-    {
-        "id": 4,
-        "client_name": "Зинаида 'Радуга' Красильникова",
-        "services": ["Окрашивание 'Жизнь в розовом цвете'", "Укладка 'Ветер в голове'"],
-        "master_id": 4,
-        "date": "2025-03-22",
-        "status": STATUS_CANCELLED
-    },
-    {
-        "id": 5,
-        "client_name": "Олег 'Викинг' Рюрикович",
-        "services": ["Плетение косичек 'Викинг'", "Стрижка бороды 'Боярин'"],
-        "master_id": 5,
-        "date": "2025-03-23",
-        "status": STATUS_NEW
-    },
-    {
-        "id": 6,
-        "client_name": "Геннадий 'Блестящий' Лысенко",
-        "services": ["Полировка лысины до блеска", "Массаж головы 'Озарение'"],
-        "master_id": 1,
-        "date": "2025-03-24",
-        "status": STATUS_CONFIRMED
-    },
-    {
-        "id": 7,
-        "client_name": "Марина 'Рапунцель' Косичкина",
-        "services": ["Укладка 'Ветер в голове'", "Мытье головы 'Душ впечатлений'"],
-        "master_id": 2,
-        "date": "2025-03-25",
-        "status": STATUS_CANCELLED
-    },
-    {
-        "id": 8,
-        "client_name": "Федор 'Кучерявый' Завитушкин",
-        "services": ["Укладка 'Взрыв на макаронной фабрике'", "Массаж головы 'Озарение'", "Мытье головы 'Душ впечатлений'"],
-        "master_id": 3,
-        "date": "2025-03-26",
-        "status": STATUS_COMPLETED
-    },
-    {
-        "id": 9,
-        "client_name": "Елизавета 'Корона' Царевна",
-        "services": ["Королевское бритье опасной бритвой"],
-        "master_id": 4,
-        "date": "2025-03-27",
-        "status": STATUS_NEW
-    },
-    {
-        "id": 10,
-        "client_name": "Добрыня 'Богатырь' Никитич",
-        "services": ["Стрижка бороды 'Боярин'", "Плетение косичек 'Викинг'", "Массаж головы 'Озарение'"],
-        "master_id": 5,
-        "date": "2025-03-28",
-        "status": STATUS_COMPLETED
-    }
-]
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from .models import Master, Service, Order, Review
 
 def landing(request):
+    """
+    Представление главной страницы (лендинга).
+    Отображает активных мастеров, опубликованные отзывы и все услуги.
+    """
+    # Получаем активных мастеров
+    masters = Master.objects.filter(is_active=True)
+    # 5 последних опубликованных отзывов (сортировка по дате создания)
+    reviews = Review.objects.filter(is_published=True).order_by('-created_at')[:5]
+    # Все доступные услуги
+    services = Service.objects.all()
+    
+    # Формируем контекст для шаблона
     context = {
         'masters': masters,
         'services': services,
+        'reviews': reviews,  # Передаем отзывы в шаблон
     }
     return render(request, 'landing.html', context)
 
-def thanks(request):
-    return render(request, 'core/thanks.html')
-
+@login_required
 def orders_list(request):
-    # Добавляем имя мастера к каждому заказу
-    for order in orders:
-        for master in masters:
-            if master['id'] == order['master_id']:
-                order['master_name'] = master['name']
-                break
+    """
+    Представление списка заказов (только для авторизованных пользователей).
+    Поддерживает фильтрацию по поисковому запросу с настройкой полей поиска.
+    """
+    # Получаем параметры поиска из GET-запроса
+    search_query = request.GET.get('search', '')  # Поисковая строка
+    # Флажки выбора полей для поиска (по умолчанию только по имени)
+    name_check = request.GET.get('name_check', 'on') == 'on'
+    phone_check = request.GET.get('phone_check', 'off') == 'on'
+    comment_check = request.GET.get('comment_check', 'off') == 'on'
     
+    # Базовый запрос: все заказы, отсортированные по дате создания (новые сверху)
+    orders = Order.objects.all().order_by('-date_created')
+    
+    # Применяем фильтрацию если есть поисковый запрос
+    if search_query:
+        # Создаем Q-объект для построения сложных запросов OR
+        q_objects = Q()
+        # Добавляем условия поиска в зависимости от выбранных чекбоксов
+        if name_check:
+            q_objects |= Q(client_name__icontains=search_query)  # Поиск по имени (без учета регистра)
+        if phone_check:
+            q_objects |= Q(phone__icontains=search_query)  # Поиск по телефону
+        if comment_check:
+            q_objects |= Q(comment__icontains=search_query)  # Поиск по комментарию
+        
+        # Применяем фильтр к queryset
+        orders = orders.filter(q_objects)
+    
+    # Формируем контекст для передачи в шаблон
     context = {
         'orders': orders,
+        'search_query': search_query,  # Сохраняем введенный запрос
+        # Сохраняем состояния чекбоксов для отображения в форме
+        'name_check': name_check,
+        'phone_check': phone_check,
+        'comment_check': comment_check,
     }
     return render(request, 'core/orders_list.html', context)
 
+@login_required
 def order_detail(request, order_id):
-    # Находим заказ по ID
-    order = None
-    for o in orders:
-        if o['id'] == order_id:
-            order = o
-            break
-    
-    # Если заказ найден, добавляем имя мастера
-    if order:
-        for master in masters:
-            if master['id'] == order['master_id']:
-                order['master_name'] = master['name']
-                break
-    
-    context = {
-        'order': order,
-    }
+    """
+    Детальное представление заказа (только для авторизованных пользователей).
+    Отображает информацию о конкретном заказе по его ID.
+    """
+    # Получаем объект заказа или 404 ошибку если не найден
+    order = get_object_or_404(Order, id=order_id)
+    # Передаем заказ в контекст шаблона
+    context = {'order': order}
     return render(request, 'core/order_detail.html', context)
