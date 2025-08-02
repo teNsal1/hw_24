@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section id="about" class="py-5">
+    <div class="container">
+        <h1 class="display-4 mb-4">Добро пожаловать в барбершоп "Стальная Борода"!</h1>
+        <p class="lead">Мы создаём стиль настоящих мужчин с 1995 года</p>
+    </div>
+</section>
+
+<section id="services" class="py-5 bg-light">
+    <div class="container">
+        <h2 class="mb-4">Наши услуги</h2>
+        <ul class="list-group">
+            {% for service in services %}
+            <li class="list-group-item">{{ service }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
+
+<section id="masters" class="py-5">
+    <div class="container">
+        <h2 class="mb-4">Наши мастера</h2>
+        <div class="row">
+            {% for master in masters %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ master.name }}</h5>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section id="booking" class="py-5 bg-light">
+    <div class="container">
+        <h2 class="mb-4">Запись онлайн</h2>
+        <!-- Здесь будет форма записи -->
+        <a href="#" class="btn btn-primary btn-lg">Записаться</a>
+    </div>
+</section>
+{% endblock %}

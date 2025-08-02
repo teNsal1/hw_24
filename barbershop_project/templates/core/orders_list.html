@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Список заявок | {{ block.super }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Список заявок</h1>
+<div class="row">
+    {% for order in orders %}
+    <div class="col-md-6 mb-4">
+        {% include 'includes/order_card.html' %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

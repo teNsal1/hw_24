@@ -1,0 +1,29 @@
+{% load static %}
+<div class="card mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Заявка #{{ order.id }}</span>
+        <span class="badge 
+            {% if order.status == 'новая' %}bg-warning
+            {% elif order.status == 'подтвержденная' %}bg-primary
+            {% elif order.status == 'отмененная' %}bg-danger
+            {% else %}bg-success{% endif %}">
+            {{ order.status }}
+        </span>
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">{{ order.client_name }}</h5>
+        <p class="card-text">
+            <strong>Дата:</strong> {{ order.date }}<br>
+            <strong>Мастер:</strong> {{ order.master_name }}<br>
+            <strong>Услуги:</strong>
+            <ul>
+                {% for service in order.services %}
+                <li>{{ service }}</li>
+                {% endfor %}
+            </ul>
+        </p>
+        <a href="{% url 'order_detail' order.id %}" class="btn btn-sm btn-outline-primary">
+            Подробнее
+        </a>
+    </div>
+</div>

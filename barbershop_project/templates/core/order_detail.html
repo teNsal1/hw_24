@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Заявка №{{ order.id }} | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>Заявка №{{ order.id }}</h1>
+    </div>
+    <div class="card-body">
+        <p><strong>Клиент:</strong> {{ order.client_name }}</p>
+        <p><strong>Мастер:</strong> {{ order.master_name }}</p>
+        <p><strong>Дата:</strong> {{ order.date }}</p>
+        <p>
+            <strong>Статус:</strong> 
+            <span class="badge 
+                {% if order.status == 'новая' %}bg-warning
+                {% elif order.status == 'подтвержденная' %}bg-primary
+                {% elif order.status == 'отмененная' %}bg-danger
+                {% else %}bg-success{% endif %}">
+                {{ order.status }}
+            </span>
+        </p>
+        
+        <h3>Услуги:</h3>
+        <ul class="mb-4">
+            {% for service in order.services %}
+            <li>{{ service }}</li>
+            {% endfor %}
+        </ul>
+        
+        <a href="{% url 'orders_list' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Назад к списку
+        </a>
+    </div>
+</div>
+{% endblock %}
