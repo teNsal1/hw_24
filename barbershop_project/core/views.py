@@ -77,3 +77,6 @@ def order_detail(request, order_id):
     # Передаем заказ в контекст шаблона
     context = {'order': order}
     return render(request, 'core/order_detail.html', context)
+
+def thanks(request):
+    return render(request, 'core/thanks.html')
